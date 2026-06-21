@@ -12,6 +12,9 @@ class Settings:
     MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
     DATABASE_NAME: str = os.getenv("DATABASE_NAME", "studypilot")
     
+    # Frontend origin for CORS (e.g., https://myapp.com or http://localhost:3000)
+    FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
+    
     # JWT authentication settings
     JWT_SECRET: str = os.getenv("JWT_SECRET", "super-secret-key-change-in-production")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")

@@ -22,20 +22,20 @@ app = FastAPI(
 # Set CORS origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://localhost:3000"], # Next.js dev server origins
+    allow_origins=["*"],  # allow all origins (tighten later for prod) from env
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Register routes
-app.include_router(auth.router, prefix="/api")
-app.include_router(documents.router, prefix="/api")
-app.include_router(plans.router, prefix="/api")
-app.include_router(quizzes.router, prefix="/api")
-app.include_router(analytics.router, prefix="/api")
-app.include_router(revision.router, prefix="/api")
-app.include_router(tutor.router, prefix="/api")
+app.include_router(auth.router)
+app.include_router(documents.router)
+app.include_router(plans.router)
+app.include_router(quizzes.router)
+app.include_router(analytics.router)
+app.include_router(revision.router)
+app.include_router(tutor.router)
 
 @app.get("/")
 async def root():
