@@ -46,7 +46,7 @@ export function Dialog({ isOpen, onClose, title, description, children }: Dialog
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-panel w-full max-w-lg bg-[rgba(15,15,30,0.85)] border border-white/10 p-6 shadow-2xl relative z-10"
+            className="glass-panel w-full max-w-full sm:max-w-lg bg-[rgba(15,15,30,0.85)] border border-white/10 p-4 sm:p-6 shadow-2xl relative z-10"
           >
             {/* Close Button */}
             <button
