@@ -31,17 +31,11 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [analyticsData, planData, topicsData, docsData] = await Promise.allSettled([
-          api.analytics.get(),
-          api.plans.getActive(),
-          api.analytics.getWeakTopics(),
-          api.documents.list()
-        ]);
-
-        if (analyticsData.status === "fulfilled") setAnalytics(analyticsData.value);
-        if (planData.status === "fulfilled") setActivePlan(planData.value);
-        if (topicsData.status === "fulfilled") setWeakTopics(topicsData.value);
-        if (docsData.status === "fulfilled") setDocuments(docsData.value);
+        const data = await api.analytics.getDashboardSummary();
+        if (data.analytics) setAnalytics(data.analytics);
+        if (data.active_plan) setActivePlan(data.active_plan);
+        if (data.weak_topics) setWeakTopics(data.weak_topics);
+        if (data.documents) setDocuments(data.documents);
       } catch (err) {
         console.error("Error loading dashboard data", err);
       } finally {

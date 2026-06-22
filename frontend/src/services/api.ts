@@ -176,6 +176,13 @@ export const api = {
       });
       return handleResponse(res);
     },
+    async getDashboardSummary() {
+      const res = await fetch(`${API_BASE_URL}/analytics/dashboard-summary`, {
+        method: "GET",
+        headers: getHeaders(),
+      });
+      return handleResponse(res);
+    },
     async logHours(date: string, hours: number) {
       const res = await fetch(`${API_BASE_URL}/analytics/study-hours`, {
         method: "POST",
