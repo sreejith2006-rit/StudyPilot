@@ -9,6 +9,12 @@ from app.routes import auth, documents, plans, quizzes, analytics, revision, tut
 async def lifespan(app: FastAPI):
     # Startup event: connect to MongoDB
     await connect_to_mongo()
+    
+    # Preload the embeddings model in a separate thread on startup to avoid blocking the first user request
+    from app.rag.document_processor import get_embeddings
+    import asyncio
+    asyncio.create_task(asyncio.to_thread(get_embeddings))
+    
     yield
     # Shutdown event: close connection
     await close_mongo_connection()

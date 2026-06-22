@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.vectorstores import Qdrant
 from langchain.chains import create_retrieval_chain
@@ -80,30 +81,41 @@ async def ask_question(collection_names: list[str], question: str):
         q_client = get_qdrant_client()
         all_docs = []
 
-        # Query each collection to retrieve candidate chunks
-        for col in collection_names:
+        async def query_collection(col: str):
             try:
-                q_client.get_collection(col)
+                def check_collection():
+                    return q_client.get_collection(col)
+                await asyncio.to_thread(check_collection)
             except Exception as e:
                 logger.error(f"Collection {col} not found in Qdrant: {e}")
-                continue
-
-            vectorstore = Qdrant(
-                client=q_client,
-                collection_name=col,
-                embeddings=embed_model
-            )
+                return []
 
             try:
-                # Get up to 3 context chunks per collection
-                docs_with_scores = vectorstore.similarity_search_with_score(question, k=3)
+                def search_vectorstore():
+                    vectorstore = Qdrant(
+                        client=q_client,
+                        collection_name=col,
+                        embeddings=embed_model
+                    )
+                    return vectorstore.similarity_search_with_score(question, k=3)
+                
+                docs_with_scores = await asyncio.to_thread(search_vectorstore)
+                col_docs = []
                 for doc, score in docs_with_scores:
                     doc.metadata["score"] = score
                     if "filename" not in doc.metadata:
                         doc.metadata["filename"] = "Unknown Source"
-                    all_docs.append(doc)
+                    col_docs.append(doc)
+                return col_docs
             except Exception as e:
                 logger.error(f"Error querying vector store for {col}: {e}")
+                return []
+
+        # Run queries across all collections concurrently
+        tasks = [query_collection(col) for col in collection_names]
+        results = await asyncio.gather(*tasks)
+        for doc_list in results:
+            all_docs.extend(doc_list)
 
         if all_docs:
             # Sort all retrieved documents by similarity score in descending order (higher is better)

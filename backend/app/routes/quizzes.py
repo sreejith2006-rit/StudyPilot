@@ -15,10 +15,33 @@ async def generate_quiz(
 ):
     db = get_database()
     user_id = current_user["_id"]
+    target_topic = quiz_data.topic or "General Study"
+    
+    # Check if a quiz with matching parameters has already been generated and not yet attempted
+    try:
+        cursor = db["quizzes"].find({
+            "user_id": user_id,
+            "document_id": quiz_data.document_id,
+            "quiz_type": quiz_data.type,
+            "topic": target_topic
+        })
+        async for existing_quiz in cursor:
+            if len(existing_quiz.get("questions", [])) == quiz_data.num_questions:
+                # Check if this specific quiz has already been attempted
+                quiz_id_str = str(existing_quiz["_id"])
+                attempt = await db["quizAttempts"].find_one({
+                    "quiz_id": quiz_id_str,
+                    "user_id": user_id
+                })
+                if not attempt:
+                    existing_quiz["_id"] = quiz_id_str
+                    return existing_quiz
+    except Exception:
+        pass
     
     # Generate quiz using Gemini
     questions = await generate_quiz_ai(
-        topic=quiz_data.topic or "General Study",
+        topic=target_topic,
         document_id=quiz_data.document_id,
         quiz_type=quiz_data.type,
         num_questions=quiz_data.num_questions
@@ -34,6 +57,7 @@ async def generate_quiz(
         "user_id": user_id,
         "document_id": quiz_data.document_id,
         "quiz_type": quiz_data.type,
+        "topic": target_topic,
         "questions": questions,
         "created_at": datetime.utcnow()
     }

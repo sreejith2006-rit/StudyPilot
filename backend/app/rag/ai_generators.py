@@ -760,10 +760,10 @@ async def generate_quiz_ai(topic: str, document_id: Optional[str], quiz_type: st
             # Fallback to scroll if context is still empty
             if not context:
                 try:
-                    # Scroll points to get document chunks
+                    # Scroll points to get document chunks (limit to 20 chunks to optimize latency and token size)
                     points, _ = q_client.scroll(
                         collection_name=collection_name,
-                        limit=100, # Retrieve up to 100 chunks of 1000 characters
+                        limit=20, 
                         with_payload=True,
                         with_vectors=False
                     )
