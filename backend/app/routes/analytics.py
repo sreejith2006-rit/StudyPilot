@@ -40,12 +40,6 @@ async def get_analytics(current_user: dict = Depends(get_current_user)):
         exam_readiness = max(0.0, min(100.0, base_score))
         
         analytics["exam_readiness_score"] = exam_readiness
-        
-        await db["analytics"].update_one(
-            {"_id": analytics["_id"]},
-            {"$set": {"exam_readiness_score": exam_readiness}}
-        )
-        
         analytics["_id"] = str(analytics["_id"])
         
     return analytics
